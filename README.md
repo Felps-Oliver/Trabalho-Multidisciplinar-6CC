@@ -3,6 +3,6 @@ Repositório para armazenas as transações do banco de dados do trabalho Multid
 
 
 # Componentes do Grupo
-Felipe Rocha
-Gabriel Tellaroli
+Felipe Rocha<br>
+Gabriel Tellaroli<br>
 Gabrielle Sperandeo
