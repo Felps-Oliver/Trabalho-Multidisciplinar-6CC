@@ -39,7 +39,9 @@ declare @percent as float = 0
 declare @id_cupom as varchar(50)
 declare @numero_cartao as char(16)
 declare @item_preço as float
-
+declare @RTL_points as int
+declare @id_carteira as varchar(50)
+declare @Rotelland_points as int
 
 BEGIN TRANSACTION
 	IF @@TRANCOUNT = 1
@@ -124,14 +126,14 @@ BEGIN TRANSACTION
 
 													SET @valor_total_itens = (SELECT valor_total_itens FROM COMPRA WHERE id = @id)
 
+													SET @item_preço = (SELECT preço FROM ITEM WHERE id = @id_item)
 													--Atualizando o desconto, caso haja um cupom
 													IF(@id_cupom IS NOT NULL)
 														BEGIN
-															SET @item_preço = (SELECT preço FROM ITEM WHERE id = @id_item)
 															SET @percent = (SELECT percentual_valor FROM CUPOM WHERE id = @id_cupom)
 															IF(@percent IS NOT NULL)
 																BEGIN
-																	SET @desconto = (@item_preço * (@percent/100))
+																	SET @desconto = ((@item_preço * @quantidade_comprada) * (@percent/100))
 
 																	--Atualizando o desconto na compra
 																	UPDATE COMPRA
@@ -161,6 +163,17 @@ BEGIN TRANSACTION
 													UPDATE RECIBO
 													SET valor_total = (@valor_total_compra - @valor_frete)
 													WHERE id = @id_recibo
+
+													--Atualizando os Rotelland Points do consumidos
+													SET @RTL_points = ((@item_preço * @quantidade_comprada) * 0.10)
+
+													SET @id_carteira = (SELECT id_carteira FROM PESSOA WHERE CPF = @CPF_consumidor)
+
+													SET @Rotelland_points = (SELECT Rotelland_points FROM CARTEIRA WHERE id = @id_carteira)
+
+													UPDATE CARTEIRA
+													SET Rotelland_points = (@Rotelland_points + @RTL_points)
+													WHERE id = @id_carteira
 												END
 										END
 									ELSE
@@ -202,14 +215,14 @@ BEGIN TRANSACTION
 
 											SET @valor_total_itens = (SELECT valor_total_itens FROM COMPRA WHERE id = @id)
 
+											SET @item_preço = (SELECT preço FROM ITEM WHERE id = @id_item)
 											--Atualizando o desconto, caso haja um cupom
 											IF(@id_cupom IS NOT NULL)
 												BEGIN
-													SET @item_preço = (SELECT preço FROM ITEM WHERE id = @id_item)
 													SET @percent = (SELECT percentual_valor FROM CUPOM WHERE id = @id_cupom)
 													IF(@percent IS NOT NULL)
 														BEGIN
-															SET @desconto = (@item_preço * (@percent/100))
+															SET @desconto = ((@item_preço * @quantidade_comprada) * (@percent/100))
 
 															--Atualizando o desconto na compra
 															UPDATE COMPRA
@@ -239,6 +252,17 @@ BEGIN TRANSACTION
 											UPDATE RECIBO
 											SET valor_total = (@valor_total_compra - @valor_frete)
 											WHERE id = @id_recibo
+
+											--Atualizando os Rotelland Points do consumidos
+											SET @RTL_points = ((@item_preço * @quantidade_comprada) * 0.10)
+
+											SET @id_carteira = (SELECT id_carteira FROM PESSOA WHERE CPF = @CPF_consumidor)
+
+											SET @Rotelland_points = (SELECT Rotelland_points FROM CARTEIRA WHERE id = @id_carteira)
+
+											UPDATE CARTEIRA
+											SET Rotelland_points = (@Rotelland_points + @RTL_points)
+											WHERE id = @id_carteira
 										END
 								END
 						END
